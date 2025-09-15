@@ -47,4 +47,4 @@ async def aimbot_role(interaction: discord.Interaction, role: str):
 
 # 🚀 起動！
 keep_alive()
-bot.run(os.getenv("MTQxNzAxNDc3NDAwNDMxODIyOA.Gl8DoF.Ok9RKaY66-PFFwIzJ62zZOq1utFOskpqaWdM1c"))
+bot.run(os.getenv("DISCORD_TOKEN"))
