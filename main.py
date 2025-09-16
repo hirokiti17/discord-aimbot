@@ -5,7 +5,19 @@ import os
 from flask import Flask
 from threading import Thread
 from googleapiclient.discovery import build
+import subprocess
+import os
+
+# ✅ Geminiライブラリのインストール（先に実行）
+subprocess.run(["pip", "install", "google-generative-ai"])
+
+# ✅ インストール後にインポート（try不要！）
 import google.generativeai as genai
+
+# ✅ APIキーの設定
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+model = genai.GenerativeModel("gemini-pro")
+
 
 # 🌐 UptimeRobot用のWebサーバー
 app = Flask('')
@@ -81,23 +93,6 @@ async def aimbot_search(interaction: discord.Interaction, keyword: str):
         await interaction.followup.send(f"検索中にエラーが発生しました: {e}")
 
 #🧠AI検索
-
-import subprocess
-
-import subprocess
-import os
-
-# ✅ Geminiライブラリの読み込み（なければインストール）
-try:
-    import google.generativeai as genai
-except ImportError:
-    subprocess.run(["pip", "install", "google-generative-ai"])
-    import google.generativeai as genai  # ← インストール後に再インポート！
-
-# ✅ APIキーの設定
-genai.configure(api_key=os.getenv("GOOGLE_AI_API_KEY"))
-model = genai.GenerativeModel("gemini-pro")
-
 
 # 🔍 Geminiライブラリの読み込み
 import google.generativeai as genai
