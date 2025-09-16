@@ -4,7 +4,6 @@ from discord import app_commands
 from discord.ext import commands
 from flask import Flask
 from threading import Thread
-from google import genai
 
 # 🌐 UptimeRobot用のWebサーバー
 app = Flask('')
@@ -29,14 +28,29 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 tree = bot.tree
 
 @bot.event
-async def on_ready():
+async def setup_hook():
     await tree.sync()
+    print("コマンド同期完了！")
+
+@bot.event
+async def on_ready():
     activity = discord.Game(name="ロールと検索を見守ってるよ！")
     await bot.change_presence(status=discord.Status.online, activity=activity)
     print(f"ログイン完了：{bot.user}")
 
-# 🌟 Geminiクライアントの設定
+# 🌟 Geminiクライアントの設定（google-genai SDK）
+from google import genai
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+# 🔍 Google検索用関数（google-api-python-client）
+from googleapiclient.discovery import build
+
+def google_search(query):
+    api_key = os.getenv("GOOGLE_API_KEY")
+    cx = os.getenv("GOOGLE_CSE_ID")
+    service = build("customsearch", "v1", developerKey=api_key)
+    res = service.cse().list(q=query, cx=cx, lr="lang_ja", num=3).execute()
+    return [item["link"] for item in res.get("items", [])]
 
 # 🎯 ロール人数カウント
 @tree.command(name="aimbot", description="指定したロールの人数を数えます！")
@@ -52,19 +66,10 @@ async def aimbot_role(interaction: discord.Interaction, role: str):
     count = sum(1 for member in guild.members if target_role in member.roles)
     await interaction.response.send_message(f"ロール「{target_role.name}」を持ってる人は {count} 人です！")
 
-#🔍　検索アプリ
-from googleapiclient.discovery import build
-
-def google_search(query):
-    api_key = os.getenv("GOOGLE_API_KEY")
-    cx = os.getenv("GOOGLE_CSE_ID")
-    service = build("customsearch", "v1", developerKey=api_key)
-    res = service.cse().list(q=query, cx=cx, lr="lang_ja", num=3).execute()
-    return [item["link"] for item in res.get("items", [])]
-
-@tree.command(name="aimbot_search", description="キーワードでGoogle検索します！")
+# 🔍 Google検索コマンド
+@tree.command(name="aimbot_google", description="キーワードでGoogle検索します！")
 @app_commands.describe(keyword="調べたい言葉")
-async def aimbot_search(interaction: discord.Interaction, keyword: str):
+async def aimbot_google(interaction: discord.Interaction, keyword: str):
     await interaction.response.defer()
 
     try:
@@ -82,11 +87,10 @@ async def aimbot_search(interaction: discord.Interaction, keyword: str):
     except Exception as e:
         await interaction.followup.send(f"検索中にエラーが発生しました: {e}")
 
-#🧠AI検索
-# 🔧 /aimbot_search AI: ○○ に対応するコマンド（Geminiによる説明機能）
-@tree.command(name="aimbot_search", description="AIが入力された内容について説明します！")
+# 🧠 Geminiによる説明コマンド
+@tree.command(name="aimbot_AI", description="AIが入力された内容について説明します！")
 @app_commands.describe(AI="説明してほしい内容を入力してください")
-async def aimbot_search(interaction: discord.Interaction, AI: str):
+async def aimbot_AI(interaction: discord.Interaction, AI: str):
     await interaction.response.defer()
 
     try:
@@ -97,7 +101,7 @@ async def aimbot_search(interaction: discord.Interaction, AI: str):
         await interaction.followup.send(response.text)
 
     except Exception as e:
-        await interaction.followup.send(f"エラーが発生しました: {e}")
+        await interaction.followup.send(f"AI検索中にエラーが発生しました: {e}")
 
 # 🚀 起動！
 keep_alive()
