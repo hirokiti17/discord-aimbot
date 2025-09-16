@@ -86,7 +86,7 @@ async def aimbot_search(interaction: discord.Interaction, keyword: str):
 import google.generativeai as genai
 
 # 🌟 Gemini APIキーの設定（on_readyの前に置くと◎）
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+genai.configure(api_key=os.getenv("GOOGLE_AI_API_KEY"))
 model = genai.GenerativeModel("gemini-pro")
 
 # 🔧 /aimbot_search AI: ○○ に対応するコマンド
