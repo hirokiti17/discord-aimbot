@@ -49,14 +49,23 @@ async def aimbot_role(interaction: discord.Interaction, role: str):
     count = sum(1 for member in guild.members if target_role in member.roles)
     await interaction.response.send_message(f"ロール「{target_role.name}」を持ってる人は {count} 人です！")
 
-# 🔍 ネット検索機能
-@tree.command(name="aimbot_search", description="キーワードでネット検索します！")
+#🔍　検索アプリ
+from googleapiclient.discovery import build
+
+def google_search(query):
+    api_key = os.getenv("GOOGLE_API_KEY")
+    cx = os.getenv("GOOGLE_CSE_ID")
+    service = build("customsearch", "v1", developerKey=api_key)
+    res = service.cse().list(q=query, cx=cx, lr="lang_ja", num=3).execute()
+    return [item["link"] for item in res.get("items", [])]
+
+@tree.command(name="aimbot_search", description="キーワードでGoogle検索します！")
 @app_commands.describe(keyword="調べたい言葉")
 async def aimbot_search(interaction: discord.Interaction, keyword: str):
     await interaction.response.defer()
 
     try:
-        results = list(search(keyword, lang="jp", num=3))
+        results = google_search(keyword)
         if not results:
             await interaction.followup.send(f"「{keyword}」に関する情報は見つかりませんでした💦")
             return
