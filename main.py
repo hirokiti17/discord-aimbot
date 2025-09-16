@@ -66,6 +66,32 @@ async def aimbot_role(interaction: discord.Interaction, role: str):
     count = sum(1 for member in guild.members if target_role in member.roles)
     await interaction.response.send_message(f"ロール「{target_role.name}」を持ってる人は {count} 人です！")
 
+# 🌐 Probotのリンク投稿TO解除コマンド
+
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return
+        # ✅ リンク投稿警告メッセージ
+    if "http://" in message.content or "https://" in message.content:
+        await message.channel.send(
+            f"{message.author.mention} リンクの投稿は禁止されてるよ！次から気をつけてね！モデレーターの判断でタイムアウトは解除されます"
+        )
+
+        # ✅ 管理チャンネルの取得
+        admin_channel = bot.get_channel(1416608371972243656)
+
+        # ✅ ボタン付き通知を送信
+        view = TimeoutActionView(user=message.author, message_to_delete=None)
+        sent = await admin_channel.send(
+            f"⚠️ {message.author.mention} がリンク投稿でタイムアウトされた可能性があります。\n"
+            f"解除するかどうか判断してください。",
+            view=view
+        )
+        view.message_to_delete = sent
+
+
+
 # 🔍 Google検索コマンド（小文字に修正！）
 @tree.command(name="aimbot_google", description="キーワードでGoogle検索します！")
 @app_commands.describe(keyword="調べたい言葉")
