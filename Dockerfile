@@ -4,13 +4,13 @@ WORKDIR /bot
 
 # 🔧 pipとビルドツールをアップグレード
 RUN pip install --upgrade pip setuptools wheel
-RUN pip install --no-cache-dir -r requirements.txt
+
+# ✅ requirements.txt を先にコピー！
+COPY requirements.txt .
 
 # 📦 ライブラリインストール
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install google-generative-ai
-
 
 # 📁 アプリ本体
 COPY . .
