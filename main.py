@@ -1,23 +1,10 @@
+import os
 import discord
 from discord import app_commands
 from discord.ext import commands
-import os
 from flask import Flask
 from threading import Thread
-from googleapiclient.discovery import build
-import subprocess
-import os
-
-# ✅ Geminiライブラリのインストール（先に実行）
-subprocess.run(["pip", "install", "google-generative-ai"])
-
-# ✅ インストール後にインポート（try不要！）
-import google.generativeai as genai
-
-# ✅ APIキーの設定
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-model = genai.GenerativeModel("gemini-pro")
-
+from google import genai
 
 # 🌐 UptimeRobot用のWebサーバー
 app = Flask('')
@@ -47,6 +34,10 @@ async def on_ready():
     activity = discord.Game(name="ロールと検索を見守ってるよ！")
     await bot.change_presence(status=discord.Status.online, activity=activity)
     print(f"ログイン完了：{bot.user}")
+
+# 🌟 Geminiクライアントの設定
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+client = genai.Client()
 
 # 🎯 ロール人数カウント
 @tree.command(name="aimbot", description="指定したロールの人数を数えます！")
@@ -93,22 +84,17 @@ async def aimbot_search(interaction: discord.Interaction, keyword: str):
         await interaction.followup.send(f"検索中にエラーが発生しました: {e}")
 
 #🧠AI検索
-
-# 🔍 Geminiライブラリの読み込み
-import google.generativeai as genai
-
-# 🌟 Gemini APIキーの設定（on_readyの前に置くと◎）
-genai.configure(api_key=os.getenv("GOOGLE_AI_API_KEY"))
-model = genai.GenerativeModel("gemini-pro")
-
-# 🔧 /aimbot_search AI: ○○ に対応するコマンド
+# 🔧 /aimbot_search AI: ○○ に対応するコマンド（ Geminiによる説明機能）
 @tree.command(name="aimbot_search", description="AIが入力された内容について説明します！")
 @app_commands.describe(AI="説明してほしい内容を入力してください")
 async def aimbot_search(interaction: discord.Interaction, AI: str):
     await interaction.response.defer()
 
     try:
-        response = model.generate_content(AI)
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=AI
+        )
         await interaction.followup.send(response.text)
 
     except Exception as e:
