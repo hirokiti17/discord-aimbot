@@ -66,7 +66,7 @@ async def aimbot_role(interaction: discord.Interaction, role: str):
     count = sum(1 for member in guild.members if target_role in member.roles)
     await interaction.response.send_message(f"ロール「{target_role.name}」を持ってる人は {count} 人です！")
 
-# 🔍 Google検索コマンド
+# 🔍 Google検索コマンド（小文字に修正！）
 @tree.command(name="aimbot_google", description="キーワードでGoogle検索します！")
 @app_commands.describe(keyword="調べたい言葉")
 async def aimbot_google(interaction: discord.Interaction, keyword: str):
@@ -87,10 +87,10 @@ async def aimbot_google(interaction: discord.Interaction, keyword: str):
     except Exception as e:
         await interaction.followup.send(f"検索中にエラーが発生しました: {e}")
 
-# 🧠 Geminiによる説明コマンド
-@tree.command(name="aimbot_AI", description="AIが入力された内容について説明します！")
+# 🧠 Geminiによる説明コマンド（小文字に修正！）
+@tree.command(name="aimbot_ai", description="AIが入力された内容について説明します！")
 @app_commands.describe(AI="説明してほしい内容を入力してください")
-async def aimbot_AI(interaction: discord.Interaction, AI: str):
+async def aimbot_ai(interaction: discord.Interaction, AI: str):
     await interaction.response.defer()
 
     try:
