@@ -5,9 +5,24 @@ from discord.ext import commands
 from flask import Flask
 from threading import Thread
 
+
+# 🌐 UptimeRobot用のWebサーバー
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Bot is alive!"
+
+def run():
+    app.run(host='0.0.0.0', port=8000)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+
 # TO解除ボタンview
 class TimeoutActionView(discord.ui.View):
-def __init__(self, user, message_to_delete):
+    def __init__(self, user, message_to_delete):
         super().__init__(timeout=None)
         self.user = user
         self.message_to_delete = message_to_delete
@@ -44,21 +59,6 @@ def __init__(self, user, message_to_delete):
             await interaction.response.send_message(
                 f"削除に失敗しました: {e}", ephemeral=True
             )
-
-
-# 🌐 UptimeRobot用のWebサーバー
-app = Flask('')
-
-@app.route('/')
-def home():
-    return "Bot is alive!"
-
-def run():
-    app.run(host='0.0.0.0', port=8000)
-
-def keep_alive():
-    t = Thread(target=run)
-    t.start()
 
 # 🤖 Discordボット設定
 intents = discord.Intents.default()
