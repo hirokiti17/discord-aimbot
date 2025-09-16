@@ -89,14 +89,14 @@ async def aimbot_google(interaction: discord.Interaction, keyword: str):
 
 # 🧠 Geminiによる説明コマンド（小文字に修正！）
 @tree.command(name="aimbot_ai", description="AIが入力された内容について説明します！")
-@app_commands.describe(AI="説明してほしい内容を入力してください")
-async def aimbot_ai(interaction: discord.Interaction, AI: str):
+@app_commands.describe(ai="説明してほしい内容を入力してください")
+async def aimbot_ai(interaction: discord.Interaction, ai: str):
     await interaction.response.defer()
 
     try:
         response = client.models.generate_content(
             model="gemini-2.5-flash",
-            contents=AI
+            contents=ai
         )
         await interaction.followup.send(response.text)
 
