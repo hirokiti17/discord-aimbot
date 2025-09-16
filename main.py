@@ -36,8 +36,7 @@ async def on_ready():
     print(f"ログイン完了：{bot.user}")
 
 # 🌟 Geminiクライアントの設定
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-client = genai.Client()
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 # 🎯 ロール人数カウント
 @tree.command(name="aimbot", description="指定したロールの人数を数えます！")
@@ -84,7 +83,7 @@ async def aimbot_search(interaction: discord.Interaction, keyword: str):
         await interaction.followup.send(f"検索中にエラーが発生しました: {e}")
 
 #🧠AI検索
-# 🔧 /aimbot_search AI: ○○ に対応するコマンド（ Geminiによる説明機能）
+# 🔧 /aimbot_search AI: ○○ に対応するコマンド（Geminiによる説明機能）
 @tree.command(name="aimbot_search", description="AIが入力された内容について説明します！")
 @app_commands.describe(AI="説明してほしい内容を入力してください")
 async def aimbot_search(interaction: discord.Interaction, AI: str):
