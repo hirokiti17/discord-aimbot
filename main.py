@@ -5,7 +5,7 @@ import os
 from flask import Flask
 from threading import Thread
 from googleapiclient.discovery import build
-
+import google.generativeai as genai
 
 # 🌐 UptimeRobot用のWebサーバー
 app = Flask('')
