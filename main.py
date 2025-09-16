@@ -80,6 +80,28 @@ async def aimbot_search(interaction: discord.Interaction, keyword: str):
     except Exception as e:
         await interaction.followup.send(f"検索中にエラーが発生しました: {e}")
 
+#🧠AI検索
+
+# 🔍 Geminiライブラリの読み込み
+import google.generativeai as genai
+
+# 🌟 Gemini APIキーの設定（on_readyの前に置くと◎）
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+model = genai.GenerativeModel("gemini-pro")
+
+# 🔧 /aimbot_search AI: ○○ に対応するコマンド
+@tree.command(name="aimbot_search", description="AIが入力された内容について説明します！")
+@app_commands.describe(AI="説明してほしい内容を入力してください")
+async def aimbot_search(interaction: discord.Interaction, AI: str):
+    await interaction.response.defer()
+
+    try:
+        response = model.generate_content(AI)
+        await interaction.followup.send(response.text)
+
+    except Exception as e:
+        await interaction.followup.send(f"エラーが発生しました: {e}")
+
 # 🚀 起動！
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
