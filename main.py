@@ -6,8 +6,8 @@ from flask import Flask
 from threading import Thread
 
 # TO解除ボタンview
- class TimeoutActionView(discord.ui.View):
-    def __init__(self, user, message_to_delete):
+class TimeoutActionView(discord.ui.View):
+def __init__(self, user, message_to_delete):
         super().__init__(timeout=None)
         self.user = user
         self.message_to_delete = message_to_delete
