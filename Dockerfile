@@ -1,13 +1,16 @@
-FROM python:3.11
+FROM python:3.10
 
 WORKDIR /bot
 
 # 🔧 pipとビルドツールをアップグレード
 RUN pip install --upgrade pip setuptools wheel
+RUN pip install --no-cache-dir -r requirements.txt
 
 # 📦 ライブラリインストール
 COPY requirements.txt .
 RUN pip install -r requirements.txt
+RUN pip install google-generative-ai
+
 
 # 📁 アプリ本体
 COPY . .
