@@ -82,6 +82,19 @@ async def aimbot_search(interaction: discord.Interaction, keyword: str):
 
 #🧠AI検索
 
+import subprocess
+
+# ✅ Geminiライブラリの読み込み（なければインストール）
+try:
+    import google.generativeai as genai
+except ImportError:
+    subprocess.run(["pip", "install", "google-generative-ai"])
+    import google.generativeai as genai
+
+# ✅ APIキーの設定
+genai.configure(api_key=os.getenv("GOOGLE_AI_API_KEY"))
+model = genai.GenerativeModel("gemini-pro")
+
 # 🔍 Geminiライブラリの読み込み
 import google.generativeai as genai
 
