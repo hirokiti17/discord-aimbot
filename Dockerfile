@@ -10,6 +10,8 @@ COPY requirements.txt .
 
 # 📦 ライブラリインストール
 RUN pip install --no-cache-dir -r requirements.txt
+
+# ✅ 直接インストール！
 RUN pip install google-generative-ai
 
 # 📁 アプリ本体
