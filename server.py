@@ -9,7 +9,7 @@ async def root():
     return {"message": "Bot is alive!"}
 
 def start():
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 def server_thread():
     t = Thread(target=start)
