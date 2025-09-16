@@ -5,6 +5,47 @@ from discord.ext import commands
 from flask import Flask
 from threading import Thread
 
+# TO解除ボタンview
+ class TimeoutActionView(discord.ui.View):
+    def __init__(self, user, message_to_delete):
+        super().__init__(timeout=None)
+        self.user = user
+        self.message_to_delete = message_to_delete
+
+    @discord.ui.button(label="タイムアウト解除", style=discord.ButtonStyle.success)
+    async def release_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not interaction.user.guild_permissions.moderate_members:
+            await interaction.response.send_message(
+                "この操作にはモデレーター権限が必要です！", ephemeral=True
+            )
+            return
+
+        try:
+            await self.user.timeout(None)
+            await interaction.response.send_message(
+                f"{self.user.mention} のタイムアウトを解除しました！", ephemeral=True
+            )
+        except Exception as e:
+            await interaction.response.send_message(
+                f"解除に失敗しました: {e}", ephemeral=True
+            )
+
+    @discord.ui.button(label="解除しない（メッセージ削除）", style=discord.ButtonStyle.danger)
+    async def dismiss_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not interaction.user.guild_permissions.moderate_members:
+            await interaction.response.send_message(
+                "この操作にはモデレーター権限が必要です！", ephemeral=True
+            )
+            return
+
+        try:
+            await self.message_to_delete.delete()
+        except Exception as e:
+            await interaction.response.send_message(
+                f"削除に失敗しました: {e}", ephemeral=True
+            )
+
+
 # 🌐 UptimeRobot用のWebサーバー
 app = Flask('')
 
