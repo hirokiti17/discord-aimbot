@@ -4,7 +4,8 @@ from discord.ext import commands
 import os
 from flask import Flask
 from threading import Thread
-from googlesearch import search
+from googleapiclient.discovery import build
+
 
 # 🌐 UptimeRobot用のWebサーバー
 app = Flask('')
