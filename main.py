@@ -145,16 +145,30 @@ async def aimbot_google(interaction: discord.Interaction, keyword: str):
             await interaction.followup.send(f"「{keyword}」に関する情報は見つかりませんでした💦")
             return
 
-        response = f"🔍「{keyword}」の検索結果：\n"
-        for url in results:
-            response += f"- {url}\n"
+        # 🌟 Embed作成
+        embed = discord.Embed(
+            title=f"🔎 検索結果 for「{keyword}」",
+            description="上位3件のリンクを表示しています。",
+            color=0x00ccff
+        )
 
-        await interaction.followup.send(response)
+        for i, url in enumerate(results, start=1):
+            site_name = url.split("/")[2]
+            embed.add_field(
+                name=f"{i}. {site_name}",
+                value=f"[リンクはこちら]({url})",
+                inline=False
+            )
+
+        embed.set_footer(text="powered by Google Custom Search")
+
+        await interaction.followup.send(embed=embed)
 
     except Exception as e:
         await interaction.followup.send(f"検索中にエラーが発生しました: {e}")
 
-# 🧠 Geminiによる説明コマンド（小文字に修正！）
+
+# 🧠 Geminiによる説明コマンド（小文字で引数を作ってね"AI"はだめ。"ai"で！）
 @tree.command(name="aimbot_ai", description="AIが入力された内容について説明します！")
 @app_commands.describe(ai="説明してほしい内容を入力してください")
 async def aimbot_ai(interaction: discord.Interaction, ai: str):
