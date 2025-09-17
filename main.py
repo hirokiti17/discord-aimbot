@@ -17,7 +17,7 @@ intents.message_content = True
 intents.guilds = True
 intents.members = True
 bot = commands.Bot(command_prefix="!", intents=intents)
-tree = app_commands.CommandTree(bot)
+tree = bot.tree
 
 # 🌐 UptimeRobot用のWebサーバー
 app = Flask('')
