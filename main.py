@@ -321,7 +321,7 @@ class LaunchLockdownView(discord.ui.View):
         )
 
 # 🔧 スラッシュコマンド：特定ロールのみ実行可能
-@tree.command(name="迎撃ボタン表示", description="迎撃ボタンを指定チャンネルに表示します")
+@tree.command(name="aimbot_intercept", description="迎撃ボタンを指定チャンネルに表示します")
 async def show_lockdown_button(interaction: discord.Interaction):
     guild = interaction.guild
     member = interaction.user
