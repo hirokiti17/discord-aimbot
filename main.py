@@ -318,9 +318,18 @@ class LaunchLockdownView(discord.ui.View):
 @bot.event
 async def on_ready():
     print(f"Bot is ready! Logged in as {bot.user}")
-    admin_channel = bot.get_channel(1416609997382488064)  # ← 表示先チャンネルIDにその都度変更
-    await admin_channel.send("🛡️ サーバー荒らし迎撃システムスタンバイ", view=LaunchLockdownView(admin_channel.guild))
 
+    # ギルド取得（Botが所属している最初のギルド）
+    guild = bot.guilds[0]
+
+    # チャンネルIDで取得（キャッシュ済みのチャンネルから探す）
+    admin_channel = discord.utils.get(guild.text_channels, id=1416609997382488064)
+
+    if admin_channel is None:
+        print("⚠️ 指定されたチャンネルが見つかりませんでした！")
+        return
+
+    await admin_channel.send("🛡️ サーバー迎撃システムスタンバイ", view=LaunchLockdownView(guild))
 
 # 🚀 起動！
 keep_alive()
