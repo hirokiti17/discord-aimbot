@@ -8,7 +8,16 @@ is_lockdown_active = False               # 迎撃モード中かどうか
 lockdown_task = None                     # 自動解除用の非同期タスク
 evac_channel = None                      # 避難チャンネルの参照
 lockdown_messages = {}                  # 警告メッセージの記録 {channel_id: message}
-
+import discord
+from discord.ext import commands
+from discord import app_commands
+import asyncio
+intents = discord.Intents.default()
+intents.message_content = True
+intents.guilds = True
+intents.members = True
+bot = commands.Bot(command_prefix="!", intents=intents)
+tree = app_commands.CommandTree(bot)
 
 # 🌐 UptimeRobot用のWebサーバー
 app = Flask('')
@@ -206,16 +215,34 @@ async def aimbot_ai(interaction: discord.Interaction, ai: str):
 
 #サーバー保護迎撃システム
 
-# 🔧 ロック開始処理（運営会議チャンネル生成付き）
+import discord
+from discord.ext import commands
+from discord import app_commands
+import asyncio
+
+intents = discord.Intents.default()
+intents.message_content = True
+intents.guilds = True
+intents.members = True
+
+bot = commands.Bot(command_prefix="!", intents=intents)
+tree = app_commands.CommandTree(bot)
+
+# 🔧 グローバル変数
+is_lockdown_active = False
+lockdown_task = None
+evac_channel = None
+lockdown_messages = {}
+
+# 🔧 ロック開始処理（緊急会議チャンネル生成付き）
 async def start_lockdown(guild):
     global is_lockdown_active, lockdown_task, evac_channel, lockdown_messages
     is_lockdown_active = True
     lockdown_messages = {}
 
-# 🔧 ロールを個別に取得
-    trusted_role = guild.get_role(1417026509490622537)  # ← 投稿許可ロールID
-    evac_role = guild.get_role(1417026509490622537)     # ← 会議所アクセスロールID
-
+    # ロールIDで個別取得
+    trusted_role = guild.get_role(1417026509490622537)  # 投稿許可ロールID
+    evac_role = guild.get_role(1417026509490622537)     # 会議所アクセスロールID
 
     # 全チャンネルロック（全員投稿不可）
     for channel in guild.text_channels:
@@ -229,10 +256,10 @@ async def start_lockdown(guild):
         except:
             pass
 
-    # 会議チャンネル作成（運営ロールのみアクセス可）
+    # 緊急会議チャンネル作成（運営ロールのみアクセス可）
     evac_overwrites = {
         guild.default_role: discord.PermissionOverwrite(view_channel=False),
-        trusted_role: discord.PermissionOverwrite(view_channel=True, send_messages=True)
+        evac_role: discord.PermissionOverwrite(view_channel=True, send_messages=True)
     }
 
     evac_channel = await guild.create_text_channel(
@@ -309,12 +336,25 @@ class LaunchLockdownView(discord.ui.View):
             "⚠️ 本当に迎撃しますか？", view=ConfirmLockdownView(self.guild), ephemeral=True
         )
 
-# 🔧 Bot起動時に管理チャンネルへボタン送信
+# 🔧 スラッシュコマンド：任意チャンネルに迎撃ボタン表示
+@tree.command(name="aimbot_intercept", description="迎撃ボタンを指定チャンネルに表示します")
+@app_commands.describe(channel="迎撃ボタンを表示するチャンネル")
+async def aimbot_intercept(interaction: discord.Interaction, channel: discord.TextChannel):
+    if not interaction.user.guild_permissions.moderate_members:
+        await interaction.response.send_message("モデレーター権限が必要です！", ephemeral=True)
+        return
+
+    await channel.send("🛡️ サーバー迎撃システム起動！", view=LaunchLockdownView(interaction.guild))
+    await interaction.response.send_message(f"{channel.mention} に迎撃ボタンを表示しました！", ephemeral=True)
+
+# 🔧 Bot起動時の処理
 @bot.event
 async def on_ready():
+    await tree.sync()
     print(f"Bot is ready! Logged in as {bot.user}")
-    admin_channel = bot.get_channel(1190231361655689291)  # ← ボタンを置くチャンネルIDにその都度変更！
+    admin_channel = bot.get_channel(1190231361655689291)  # ← 初期表示チャンネルID。その都度変更
     await admin_channel.send("🛡️ サーバー迎撃システム起動！", view=LaunchLockdownView(admin_channel.guild))
+
 
 # 🚀 起動！
 keep_alive()
