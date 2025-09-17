@@ -241,8 +241,8 @@ async def start_lockdown(guild):
     lockdown_messages = {}
 
     # ロールIDで個別取得
-    trusted_role = guild.get_role(1417026509490622537)  # 投稿許可ロールID
-    evac_role = guild.get_role(1417026509490622537)     # 会議所アクセスロールID
+    trusted_role = guild.get_role(1410874065119346869)  # 投稿許可ロールID
+    evac_role = guild.get_role(1415664609397833818)     # 会議所アクセスロールID
 
     # 全チャンネルロック（全員投稿不可）
     for channel in guild.text_channels:
@@ -336,24 +336,13 @@ class LaunchLockdownView(discord.ui.View):
             "⚠️ 本当に迎撃しますか？", view=ConfirmLockdownView(self.guild), ephemeral=True
         )
 
-# 🔧 スラッシュコマンド：任意チャンネルに迎撃ボタン表示
-@tree.command(name="aimbot_intercept", description="迎撃ボタンを指定チャンネルに表示します")
-@app_commands.describe(channel="迎撃ボタンを表示するチャンネル")
-async def aimbot_intercept(interaction: discord.Interaction, channel: discord.TextChannel):
-    if not interaction.user.guild_permissions.moderate_members:
-        await interaction.response.send_message("モデレーター権限が必要です！", ephemeral=True)
-        return
-
-    await channel.send("🛡️ サーバー迎撃システム起動！", view=LaunchLockdownView(interaction.guild))
-    await interaction.response.send_message(f"{channel.mention} に迎撃ボタンを表示しました！", ephemeral=True)
-
 # 🔧 Bot起動時の処理
 @bot.event
 async def on_ready():
     await tree.sync()
     print(f"Bot is ready! Logged in as {bot.user}")
-    admin_channel = bot.get_channel(1190231361655689291)  # ← 初期表示チャンネルID。その都度変更
-    await admin_channel.send("🛡️ サーバー迎撃システム起動！", view=LaunchLockdownView(admin_channel.guild))
+    admin_channel = bot.get_channel(1416609997382488064)  # ← 初期表示チャンネルID。その都度変更
+    await admin_channel.send("🛡️ サーバー荒らし迎撃システムスタンバイ", view=LaunchLockdownView(admin_channel.guild))
 
 
 # 🚀 起動！
