@@ -160,15 +160,32 @@ async def aimbot_google(interaction: discord.Interaction, keyword: str):
 async def aimbot_ai(interaction: discord.Interaction, ai: str):
     await interaction.response.defer()
 
+    # 🌟 自動プロンプト加工
+    prompt = (
+        f"以下の内容について、初心者にもわかるように、"
+        f"要点だけを箇条書きで、2000文字以内に簡潔にまとめてください：\n{ai}"
+    )
+
     try:
         response = client.models.generate_content(
             model="gemini-2.5-flash",
-            contents=ai
+            contents=prompt
         )
-        await interaction.followup.send(response.text)
+
+        if not response.text:
+            await interaction.followup.send("AIからの応答が空でした💦")
+            return
+
+        # 🌟 応答が長すぎる場合に備えて分割送信
+        def split_message(text, max_length=2000):
+            return [text[i:i+max_length] for i in range(0, len(text), max_length)]
+
+        for chunk in split_message(response.text):
+            await interaction.followup.send(chunk)
 
     except Exception as e:
         await interaction.followup.send(f"AI検索中にエラーが発生しました: {e}")
+
 
 # 🚀 起動！
 keep_alive()
