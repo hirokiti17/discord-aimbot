@@ -4,6 +4,10 @@ from discord import app_commands
 from discord.ext import commands
 from flask import Flask
 from threading import Thread
+is_lockdown_active = False               # 迎撃モード中かどうか
+lockdown_task = None                     # 自動解除用の非同期タスク
+evac_channel = None                      # 避難チャンネルの参照
+lockdown_messages = {}                  # 警告メッセージの記録 {channel_id: message}
 
 
 # 🌐 UptimeRobot用のWebサーバー
@@ -200,6 +204,117 @@ async def aimbot_ai(interaction: discord.Interaction, ai: str):
     except Exception as e:
         await interaction.followup.send(f"AI検索中にエラーが発生しました: {e}")
 
+#サーバー保護迎撃システム
+
+# 🔧 ロック開始処理（運営会議チャンネル生成付き）
+async def start_lockdown(guild):
+    global is_lockdown_active, lockdown_task, evac_channel, lockdown_messages
+    is_lockdown_active = True
+    lockdown_messages = {}
+
+# 🔧 ロールを個別に取得
+    trusted_role = guild.get_role(1410874065119346869)  # ← 投稿許可ロールID
+    evac_role = guild.get_role(1415664609397833818)     # ← 会議所アクセスロールID
+
+
+    # 全チャンネルロック（全員投稿不可）
+    for channel in guild.text_channels:
+        try:
+            await channel.edit(overwrites={
+                guild.default_role: discord.PermissionOverwrite(send_messages=False),
+                trusted_role: discord.PermissionOverwrite(send_messages=False)
+            })
+            msg = await channel.send("🚨 このチャンネルは現在迎撃保護モード中です。3分間投稿できません！")
+            lockdown_messages[channel.id] = msg
+        except:
+            pass
+
+    # 会議チャンネル作成（運営ロールのみアクセス可）
+    evac_overwrites = {
+        guild.default_role: discord.PermissionOverwrite(view_channel=False),
+        trusted_role: discord.PermissionOverwrite(view_channel=True, send_messages=True)
+    }
+
+    evac_channel = await guild.create_text_channel(
+        name="緊急運営チャンネル",
+        overwrites=evac_overwrites,
+        topic="迎撃システム起動中の対応会議はこちらでどうぞ！"
+    )
+
+    await evac_channel.send("🏕️ 緊急会議所が開設されました！")
+
+    # 自動解除タスク
+    async def unlock_after_delay():
+        await asyncio.sleep(180)
+        await cancel_lockdown(guild)
+
+    lockdown_task = asyncio.create_task(unlock_after_delay())
+
+# 🔧 ロック解除処理
+async def cancel_lockdown(guild):
+    global is_lockdown_active, lockdown_task, evac_channel, lockdown_messages
+    if not is_lockdown_active:
+        return
+
+    is_lockdown_active = False
+    if lockdown_task:
+        lockdown_task.cancel()
+
+    for channel in guild.text_channels:
+        try:
+            await channel.edit(overwrites={})
+            msg = lockdown_messages.get(channel.id)
+            if msg:
+                await msg.delete()
+        except:
+            pass
+
+    lockdown_messages.clear()
+
+    if evac_channel:
+        await evac_channel.send("✅ 迎撃が終了しました。会議所は必要に応じて削除してください。")
+
+# 🔧 ダブルチェックView
+class ConfirmLockdownView(discord.ui.View):
+    def __init__(self, guild):
+        super().__init__(timeout=60)
+        self.guild = guild
+
+    @discord.ui.button(label="はい、迎撃します", style=discord.ButtonStyle.danger)
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not interaction.user.guild_permissions.moderate_members:
+            await interaction.response.send_message("モデレーター権限が必要です！", ephemeral=True)
+            return
+
+        await interaction.response.send_message("🌊 迎撃開始！")
+        await start_lockdown(self.guild)
+
+    @discord.ui.button(label="キャンセル", style=discord.ButtonStyle.secondary)
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("迎撃をキャンセルしました！", ephemeral=True)
+
+# 🔧 迎撃ボタンView
+class LaunchLockdownView(discord.ui.View):
+    def __init__(self, guild):
+        super().__init__(timeout=None)
+        self.guild = guild
+
+    @discord.ui.button(label="迎撃する", style=discord.ButtonStyle.danger)
+    async def launch(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not interaction.user.guild_permissions.moderate_members:
+            await interaction.response.send_message("モデレーター権限が必要です！", ephemeral=True)
+            return
+
+        await interaction.response.send_message(
+            "⚠️ 本当に迎撃しますか？", view=ConfirmLockdownView(self.guild), ephemeral=True
+        )
+
+# 🔧 Bot起動時に管理チャンネルへボタン送信
+@bot.event
+async def on_ready():
+    print(f"Bot is ready! Logged in as {bot.user}")
+    admin_channel = bot.get_channel(1416609997382488064)  # ← ボタンを置くチャンネルIDにその都度変更！
+    await admin_channel.send("🛡️ サーバー迎撃システム起動！", view=LaunchLockdownView(admin_channel.guild))
 
 # 🚀 起動！
 keep_alive()
