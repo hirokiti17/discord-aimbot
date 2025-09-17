@@ -213,8 +213,8 @@ async def start_lockdown(guild):
     lockdown_messages = {}
 
 # 🔧 ロールを個別に取得
-    trusted_role = guild.get_role(1410874065119346869)  # ← 投稿許可ロールID
-    evac_role = guild.get_role(1415664609397833818)     # ← 会議所アクセスロールID
+    trusted_role = guild.get_role(1417026509490622537)  # ← 投稿許可ロールID
+    evac_role = guild.get_role(1417026509490622537)     # ← 会議所アクセスロールID
 
 
     # 全チャンネルロック（全員投稿不可）
@@ -313,7 +313,7 @@ class LaunchLockdownView(discord.ui.View):
 @bot.event
 async def on_ready():
     print(f"Bot is ready! Logged in as {bot.user}")
-    admin_channel = bot.get_channel(1416609997382488064)  # ← ボタンを置くチャンネルIDにその都度変更！
+    admin_channel = bot.get_channel(1190231361655689291)  # ← ボタンを置くチャンネルIDにその都度変更！
     await admin_channel.send("🛡️ サーバー迎撃システム起動！", view=LaunchLockdownView(admin_channel.guild))
 
 # 🚀 起動！
