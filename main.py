@@ -8,16 +8,12 @@ is_lockdown_active = False               # 迎撃モード中かどうか
 lockdown_task = None                     # 自動解除用の非同期タスク
 evac_channel = None                      # 避難チャンネルの参照
 lockdown_messages = {}                  # 警告メッセージの記録 {channel_id: message}
-import discord
-from discord.ext import commands
-from discord import app_commands
-import asyncio
 intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
 intents.members = True
+
 bot = commands.Bot(command_prefix="!", intents=intents)
-tree = bot.tree
 
 # 🌐 UptimeRobot用のWebサーバー
 app = Flask('')
@@ -215,24 +211,6 @@ async def aimbot_ai(interaction: discord.Interaction, ai: str):
 
 #サーバー保護迎撃システム
 
-import discord
-from discord.ext import commands
-from discord import app_commands
-import asyncio
-
-intents = discord.Intents.default()
-intents.message_content = True
-intents.guilds = True
-intents.members = True
-
-bot = commands.Bot(command_prefix="!", intents=intents)
-tree = bot.tree
-
-# 🔧 グローバル変数
-is_lockdown_active = False
-lockdown_task = None
-evac_channel = None
-lockdown_messages = {}
 
 # 🔧 ロック開始処理（緊急会議チャンネル生成付き）
 async def start_lockdown(guild):
@@ -241,8 +219,8 @@ async def start_lockdown(guild):
     lockdown_messages = {}
 
     # ロールIDで個別取得
-    trusted_role = guild.get_role(1410874065119346869)  # 投稿許可ロールID
-    evac_role = guild.get_role(1415664609397833818)     # 会議所アクセスロールID
+    trusted_role = guild.get_role(1415664609397833818)  # 投稿許可ロールID
+    evac_role = guild.get_role(1417026509490622537)     # 会議所アクセスロールID
 
     # 全チャンネルロック（全員投稿不可）
     for channel in guild.text_channels:
@@ -251,7 +229,7 @@ async def start_lockdown(guild):
                 guild.default_role: discord.PermissionOverwrite(send_messages=False),
                 trusted_role: discord.PermissionOverwrite(send_messages=False)
             })
-            msg = await channel.send("🚨 このチャンネルは現在迎撃保護モード中です。3分間投稿できません！")
+            msg = await channel.send("🚨 このチャンネルは現在荒らし迎撃保護モード中です。3分間投稿できません！")
             lockdown_messages[channel.id] = msg
         except:
             pass
@@ -336,12 +314,11 @@ class LaunchLockdownView(discord.ui.View):
             "⚠️ 本当に迎撃しますか？", view=ConfirmLockdownView(self.guild), ephemeral=True
         )
 
-# 🔧 Bot起動時の処理
+# 🔧 Bot起動時の処理（指定チャンネルにボタン表示）
 @bot.event
 async def on_ready():
-    await tree.sync()
     print(f"Bot is ready! Logged in as {bot.user}")
-    admin_channel = bot.get_channel(1416609997382488064)  # ← 初期表示チャンネルID。その都度変更
+    admin_channel = bot.get_channel(1416609997382488064)  # ← 表示先チャンネルIDにその都度変更
     await admin_channel.send("🛡️ サーバー荒らし迎撃システムスタンバイ", view=LaunchLockdownView(admin_channel.guild))
 
 
