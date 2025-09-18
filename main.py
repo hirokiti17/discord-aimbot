@@ -35,44 +35,44 @@ def keep_alive():
     t.start()
 
 # TO解除ボタンview
-class TimeoutActionView(discord.ui.View):
-    def __init__(self, user, message_to_delete):
-        super().__init__(timeout=None)
-        self.user = user
-        self.message_to_delete = message_to_delete
+#class TimeoutActionView(discord.ui.View):
+#    def __init__(self, user, message_to_delete):
+#        super().__init__(timeout=None)
+#        self.user = user
+#        self.message_to_delete = message_to_delete
 
-    @discord.ui.button(label="タイムアウト解除", style=discord.ButtonStyle.success)
-    async def release_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if not interaction.user.guild_permissions.moderate_members:
-            await interaction.response.send_message(
-                "この操作にはモデレーター権限が必要です！", ephemeral=True
-            )
-            return
+#    @discord.ui.button(label="タイムアウト解除", style=discord.ButtonStyle.success)
+#    async def release_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+#        if not interaction.user.guild_permissions.moderate_members:
+#            await interaction.response.send_message(
+#                "この操作にはモデレーター権限が必要です！", ephemeral=True
+#            )
+#            return
 
-        try:
-            await self.user.timeout(None)
-            await interaction.response.send_message(
-                f"{self.user.mention} のタイムアウトを解除しました！", ephemeral=True
-            )
-        except Exception as e:
-            await interaction.response.send_message(
-                f"解除に失敗しました: {e}", ephemeral=True
-            )
-
-    @discord.ui.button(label="解除しない（メッセージ削除）", style=discord.ButtonStyle.danger)
-    async def dismiss_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if not interaction.user.guild_permissions.moderate_members:
-            await interaction.response.send_message(
-                "この操作にはモデレーター権限が必要です！", ephemeral=True
-            )
-            return
-
-        try:
-            await self.message_to_delete.delete()
-        except Exception as e:
-            await interaction.response.send_message(
-                f"削除に失敗しました: {e}", ephemeral=True
-            )
+#        try:
+#            await self.user.timeout(None)
+#            await interaction.response.send_message(
+#                f"{self.user.mention} のタイムアウトを解除しました！", ephemeral=True
+#            )
+#        except Exception as e:
+#            await interaction.response.send_message(
+#                f"解除に失敗しました: {e}", ephemeral=True
+#            )
+#
+#    @discord.ui.button(label="解除しない（メッセージ削除）", style=discord.ButtonStyle.danger)
+#    async def dismiss_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+#        if not interaction.user.guild_permissions.moderate_members:
+#            await interaction.response.send_message(
+#                "この操作にはモデレーター権限が必要です！", ephemeral=True
+#            )
+#            return
+#
+#        try:
+#            await self.message_to_delete.delete()
+#        except Exception as e:
+#            await interaction.response.send_message(
+#                f"削除に失敗しました: {e}", ephemeral=True
+#            )
 
 # 🤖 Discordボット設定
 intents = discord.Intents.default()
@@ -123,28 +123,28 @@ async def aimbot_role(interaction: discord.Interaction, role: str):
 
 # 🌐 Probotのリンク投稿TO解除コマンド
 
-@bot.event
-async def on_message(message):
-    if message.author.bot:
-        return
-        # ✅ リンク投稿警告メッセージ
-    if "http://" in message.content or "https://" in message.content:
-        await message.channel.send(
-            f"{message.author.mention} リンクの投稿は禁止されてるよ！次から気をつけてね！モデレーターの判断でタイムアウトは解除されます"
-        )
-
-        # ✅ 管理チャンネルの取得
-        admin_channel = bot.get_channel(1416608371972243656)
-
-        # ✅ ボタン付き通知を送信
-        view = TimeoutActionView(user=message.author, message_to_delete=None)
-        sent = await admin_channel.send(
-            f"⚠️ {message.author.mention} がリンク投稿でタイムアウトされた可能性があります。\n"
-            f"解除するかどうか判断してください。",
-            view=view
-        )
-        view.message_to_delete = sent
-
+#@bot.event
+#async def on_message(message):
+#    if message.author.bot:
+#        return
+#         ✅ リンク投稿警告メッセージ
+#    if "http://" in message.content or "https://" in message.content:
+#        await message.channel.send(
+#            f"{message.author.mention} リンクの投稿は禁止されてるよ！次から気をつけてね！モデレーターの判断でタイムアウトは解除されます"
+#        )
+#
+#         ✅ 管理チャンネルの取得
+#        admin_channel = bot.get_channel(必要になったら設定してね)
+#
+#         ✅ ボタン付き通知を送信
+#        view = TimeoutActionView(user=message.author, message_to_delete=None)
+#        sent = await admin_channel.send(
+#            f"⚠️ {message.author.mention} がリンク投稿でタイムアウトされた可能性があります。\n"
+#            f"解除するかどうか判断してください。",
+#            view=view
+#        )
+#        view.message_to_delete = sent
+#
 
 
 # 🔍 Google検索コマンド（小文字に修正！）
