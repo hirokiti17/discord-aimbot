@@ -228,8 +228,8 @@ async def start_lockdown(guild):
     is_lockdown_active = True
     lockdown_messages = {}
 
-    trusted_role = guild.get_role(1415664609397833818)  # 投稿許可ロールID
-    evac_role = guild.get_role(1417026509490622537)     # 会議所アクセスロールID
+    trusted_role = guild.get_role(1418023903573573803)  # 投稿許可ロールID
+    evac_role = guild.get_role(1418023903573573803)     # 会議所アクセスロールID
 
     for channel in guild.text_channels:
         try:
@@ -325,8 +325,8 @@ class LaunchLockdownView(discord.ui.View):
 async def show_lockdown_button(interaction: discord.Interaction):
     guild = interaction.guild
     member = interaction.user
-    target_channel_id = 1416609997382488064
-    required_role_id = 1415664609397833818
+    target_channel_id = 1417659415196209224
+    required_role_id = 1418023903573573803
 
     role_ids = [role.id for role in member.roles]
     if required_role_id not in role_ids:
